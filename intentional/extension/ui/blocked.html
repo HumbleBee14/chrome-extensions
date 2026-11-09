@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Daily limit reached · Intentional</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="../icons/32.png" />
+  </head>
+  <body class="blocked-page">
+    <main class="blocked-card">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">◒</span>Intentional
+      </div>
+      <h1 id="title">Daily limit reached.</h1>
+      <p id="message">
+        You’ve used your daily allowance. Make room for something else.
+      </p>
+      <div id="scope" class="scope" hidden></div>
+      <p id="reset" class="small">Resets at midnight.</p>
+      <div class="blocked-actions">
+        <button id="leave">Leave</button>
+        <button id="retry" class="secondary" hidden>Open website</button>
+        <button id="settings" class="secondary">View limits</button>
+      </div>
+    </main>
+    <script type="module" src="blocked.js"></script>
+  </body>
+</html>

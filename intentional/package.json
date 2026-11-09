@@ -1,0 +1,34 @@
+{
+  "name": "intentional",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "lint": "eslint extension tests scripts",
+    "check": "npm run lint && npm test && node scripts/check-manifest.js",
+    "test:browser": "node tests/browser.js",
+    "test:reconnect": "node tests/reconnect.js",
+    "test:form": "node tests/form.js",
+    "test:activity": "node tests/activity-browser.js",
+    "test:ui": "node tests/ui-workflow.js",
+    "package": "node scripts/package.js",
+    "format": "prettier --write extension tests scripts eslint.config.js package.json README.md docs",
+    "format:check": "prettier --check extension tests scripts eslint.config.js package.json README.md docs",
+    "test:package": "npm run package && node scripts/smoke-package.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "globals": "^17.13.0",
+    "playwright": "^1.63.0",
+    "prettier": "^3.9.9"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  }
+}

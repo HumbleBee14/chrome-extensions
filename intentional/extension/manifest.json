@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "incognito": "not_allowed",
+  "name": "Intentional",
+  "short_name": "Intentional",
+  "version": "1.0.0",
+  "description": "Use websites with intention. Set daily limits for domains or paths, log your reasons, and choose session timers.",
+  "minimum_chrome_version": "120",
+  "permissions": [
+    "storage",
+    "alarms",
+    "scripting",
+    "activeTab",
+    "idle",
+    "webNavigation",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "ui/popup.html",
+    "default_title": "Intentional",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    }
+  },
+  "options_ui": {
+    "page": "ui/options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["ui/blocked.html"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+  },
+  "optional_permissions": ["tabs"]
+}

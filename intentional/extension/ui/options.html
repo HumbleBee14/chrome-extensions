@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Intentional</title>
+    <link rel="icon" href="../icons/32.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="rail">
+        <div class="brand">
+          <span class="mark" aria-hidden="true">◒</span>Intentional
+        </div>
+        <nav role="tablist" aria-label="Sections">
+          <button
+            class="nav-button"
+            id="limits-tab"
+            role="tab"
+            aria-controls="limits-panel"
+            aria-selected="true"
+          >
+            <span class="nav-icon" aria-hidden="true">◷</span>Limits
+          </button>
+          <button
+            class="nav-button"
+            id="activity-tab"
+            role="tab"
+            aria-controls="activity-panel"
+            aria-selected="false"
+          >
+            <span class="nav-icon" aria-hidden="true">≡</span>Activity
+          </button>
+          <button
+            class="nav-button"
+            id="settings-tab"
+            role="tab"
+            aria-controls="settings-panel"
+            aria-selected="false"
+          >
+            <span class="nav-icon" aria-hidden="true">⚙</span>Settings
+          </button>
+        </nav>
+        <div class="rail-footer">
+          <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>
+        </div>
+      </aside>
+      <main class="main">
+        <div id="page-error" class="page-error" role="alert" hidden></div>
+        <div class="heading">
+          <h1 id="page-title">Limits</h1>
+          <button id="add-rule">Add a limit</button>
+        </div>
+        <section id="limits-panel" role="tabpanel" aria-labelledby="limits-tab">
+          <div id="rules"></div>
+        </section>
+        <section
+          id="activity-panel"
+          role="tabpanel"
+          aria-labelledby="activity-tab"
+          hidden
+        >
+          <div class="activity-toolbar">
+            <div
+              class="period-switch"
+              role="group"
+              aria-label="Activity period"
+            >
+              <button id="activity-day" aria-pressed="true">Day</button>
+              <button id="activity-week" aria-pressed="false">Week</button>
+            </div>
+            <label class="activity-date"
+              >Date <input id="activity-date" type="date"
+            /></label>
+          </div>
+          <p id="activity-period" class="muted"></p>
+          <div class="metrics">
+            <div class="metric">
+              <strong id="active-time">0m</strong><span>active time</span>
+            </div>
+            <div class="metric">
+              <strong id="session-count">0</strong><span>sessions</span>
+            </div>
+            <div class="metric">
+              <strong id="override-count">0</strong><span>overrides</span>
+            </div>
+            <div class="metric">
+              <strong id="overtime-time">0m</strong><span>time over limit</span>
+            </div>
+          </div>
+          <p id="activity-note" class="field-hint" hidden></p>
+          <div id="activity-weekdays" class="activity-weekdays" hidden></div>
+          <div class="section-header">
+            <h2>Reasons</h2>
+            <div class="activity-tools">
+              <button id="export-logs" class="secondary small">Export</button>
+              <button id="clear-logs" class="text-button small danger">
+                Clear logs
+              </button>
+            </div>
+          </div>
+          <div id="logs"></div>
+          <p class="footnote">
+            Last 30 days · up to 1,000 reasons. Session counts reflect retained
+            reasons.
+          </p>
+        </section>
+        <section
+          id="settings-panel"
+          role="tabpanel"
+          aria-labelledby="settings-tab"
+          hidden
+        >
+          <section class="settings-section preset-settings">
+            <form id="global-presets-form">
+              <div class="section-header">
+                <h2>Common reasons</h2>
+              </div>
+
+              <div
+                id="global-presets"
+                class="preset-editor"
+                role="group"
+                aria-label="Common reasons"
+              ></div>
+              <p
+                id="global-presets-error"
+                class="form-error"
+                role="alert"
+                hidden
+              ></p>
+              <div class="preset-actions">
+                <button type="submit" id="save-presets" class="small" disabled>
+                  Save reasons
+                </button>
+              </div>
+            </form>
+          </section>
+          <section class="settings-section">
+            <div class="section-header">
+              <h2>Extension-page guard</h2>
+              <button
+                id="strict-toggle"
+                class="secondary small"
+                aria-pressed="false"
+              >
+                Enable guard
+              </button>
+            </div>
+            <p id="strict-description">
+              Off by default. Redirects Chrome’s extensions manager to a
+              reminder. Other disable and uninstall routes remain available.
+              Enabling asks for tab URL access.
+            </p>
+          </section>
+          <section class="data-section">
+            <h2>Data</h2>
+            <p>
+              Clearing logs keeps your daily usage and locks. Erasing all data
+              removes your rules, usage, timers, and logs.
+            </p>
+            <div class="data-actions">
+              <button id="export-data" class="secondary small">
+                Export all data</button
+              ><button id="clear-data" class="text-button small danger">
+                Erase all data
+              </button>
+            </div>
+          </section>
+          <section class="data-section">
+            <h2>Privacy</h2>
+            <p>
+              No accounts, analytics, or cloud sync. Your limits and intentions
+              stay in this Chrome profile.
+            </p>
+            <a class="small" href="privacy.html" target="_blank" rel="noopener"
+              >Read the privacy policy ↗</a
+            >
+          </section>
+        </section>
+      </main>
+    </div>
+    <dialog id="rule-dialog" aria-labelledby="rule-dialog-title">
+      <div class="dialog-header">
+        <h2 id="rule-dialog-title">Add a limit</h2>
+        <input
+          id="label"
+          name="label"
+          form="rule-form"
+          aria-label="Name (optional)"
+          placeholder="Name (optional)"
+          maxlength="32"
+        />
+        <button class="close" id="close-rule" aria-label="Close">×</button>
+      </div>
+      <form id="rule-form">
+        <div class="field-heading">
+          <label class="field" for="target">Website or path</label>
+          <label class="check"
+            ><input
+              type="checkbox"
+              id="includeSubdomains"
+              name="includeSubdomains"
+              checked
+            /><span>Subdomains</span></label
+          >
+        </div>
+        <input
+          id="target"
+          name="target"
+          type="text"
+          placeholder="youtube.com/shorts"
+          required
+          maxlength="600"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="field-grid">
+          <div>
+            <label class="field" for="mode">Monitor</label>
+            <select id="mode" name="mode">
+              <option value="prefix">Path + children</option>
+              <option value="exact">Exact path</option>
+              <option value="domain">Whole website</option>
+            </select>
+          </div>
+          <div>
+            <div class="daily-limit-heading">
+              <label class="field" for="dailyMinutes">Daily limit</label>
+              <span id="daily-limit-max" class="muted"></span>
+            </div>
+            <div class="number-field">
+              <input
+                id="dailyMinutes"
+                name="dailyMinutes"
+                aria-label="Daily limit in minutes"
+                aria-describedby="daily-limit-max"
+                type="number"
+                step="1"
+                required
+              /><span aria-hidden="true">min</span>
+            </div>
+          </div>
+        </div>
+        <div class="rule-options">
+          <div class="option-with-info">
+            <label class="check"
+              ><input
+                type="checkbox"
+                id="intentionalVisits"
+                name="intentionalVisits"
+                checked
+              /><span>Intentional visits</span></label
+            ><button
+              class="info-button"
+              type="button"
+              data-info="intentional-visits-help"
+              aria-label="About intentional visits"
+              aria-describedby="intentional-visits-help"
+              aria-expanded="false"
+            >
+              i</button
+            ><span
+              id="intentional-visits-help"
+              class="info-popover"
+              role="tooltip"
+              popover="auto"
+              >Choose why you’re visiting and how long to stay.</span
+            >
+          </div>
+          <div class="option-with-info">
+            <label class="check"
+              ><input
+                type="checkbox"
+                id="preventOverrides"
+                name="preventOverrides"
+              /><span>Prevent overrides</span></label
+            ><button
+              class="info-button"
+              type="button"
+              data-info="prevent-overrides-help"
+              aria-label="About prevent overrides"
+              aria-describedby="prevent-overrides-help"
+              aria-expanded="false"
+            >
+              i</button
+            ><span
+              id="prevent-overrides-help"
+              class="info-popover"
+              role="tooltip"
+              popover="auto"
+              >Block extra time after your daily limit, until midnight.</span
+            >
+          </div>
+        </div>
+        <div class="message-heading">
+          <label class="field" for="message"
+            >Message note <span class="muted">· optional</span></label
+          >
+          <div class="message-tools">
+            <span id="message-count" class="muted" aria-live="off">0/160</span>
+            <details id="message-color-picker" class="color-picker">
+              <summary aria-label="Message color" title="Message color">
+                <span id="message-color-preview"></span>
+              </summary>
+              <div
+                class="color-swatches"
+                role="radiogroup"
+                aria-label="Message color"
+              >
+                <label class="color-choice" title="Black"
+                  ><input
+                    type="radio"
+                    name="messageColor"
+                    value="#27372f"
+                    aria-label="Black"
+                    checked /><span style="--swatch: #27372f"></span></label
+                ><label class="color-choice" title="Green"
+                  ><input
+                    type="radio"
+                    name="messageColor"
+                    value="#00875a"
+                    aria-label="Green" /><span
+                    style="--swatch: #00875a"
+                  ></span></label
+                ><label class="color-choice" title="Blue"
+                  ><input
+                    type="radio"
+                    name="messageColor"
+                    value="#0969ff"
+                    aria-label="Blue" /><span
+                    style="--swatch: #0969ff"
+                  ></span></label
+                ><label class="color-choice" title="Purple"
+                  ><input
+                    type="radio"
+                    name="messageColor"
+                    value="#8b2cf5"
+                    aria-label="Purple" /><span
+                    style="--swatch: #8b2cf5"
+                  ></span></label
+                ><label class="color-choice" title="Orange"
+                  ><input
+                    type="radio"
+                    name="messageColor"
+                    value="#c65100"
+                    aria-label="Orange" /><span
+                    style="--swatch: #c65100"
+                  ></span></label
+                ><label class="color-choice" title="Red"
+                  ><input
+                    type="radio"
+                    name="messageColor"
+                    value="#e5252a"
+                    aria-label="Red" /><span style="--swatch: #e5252a"></span
+                ></label>
+              </div>
+            </details>
+          </div>
+        </div>
+        <textarea
+          id="message"
+          name="message"
+          aria-describedby="message-count"
+          maxlength="160"
+          rows="2"
+          placeholder="Is this worth your time?"
+        ></textarea>
+        <label class="check" id="enabled-field" hidden
+          ><input type="checkbox" id="enabled" name="enabled" checked /><span
+            >Enabled</span
+          ></label
+        >
+        <p class="rule-privacy">
+          Saves usage and reasons on this device for up to 30 days.
+          <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>
+        </p>
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+        <div class="form-actions">
+          <button
+            id="delete-rule"
+            aria-label="Delete limit"
+            class="text-button danger small"
+            type="button"
+            hidden
+          >
+            Delete
+          </button>
+          <div class="form-buttons">
+            <button id="cancel-rule" class="secondary" type="button">
+              Cancel
+            </button>
+            <button id="save-rule" type="submit" aria-label="Save limit">
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+      <h2 id="confirm-title"></h2>
+      <p class="confirm-copy" id="confirm-copy"></p>
+      <div class="form-actions">
+        <div class="form-buttons">
+          <button id="confirm-cancel" class="secondary">Cancel</button
+          ><button id="confirm-action">Continue</button>
+        </div>
+      </div>
+    </dialog>
+    <div class="status-toast" id="toast" role="status" hidden></div>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

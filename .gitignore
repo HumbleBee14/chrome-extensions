@@ -1,4 +1,7 @@
 node_modules/
+artifacts/
+dist/
 *.log
-*.zip
+.DS_Store
 .env
+.env.*

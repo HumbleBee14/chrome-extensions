@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Intentional</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="popup">
+    <header class="popup-header">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">◒</span>Intentional
+      </div>
+      <button
+        id="settings"
+        class="text-button small"
+        aria-label="Open settings"
+        title="Settings"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M9.5 3h5l.6 2.4 1.5.9 2.4-.7 2.5 4.3-1.8 1.7v1.8l1.8 1.7-2.5 4.3-2.4-.7-1.5.9-.6 2.4h-5l-.6-2.4-1.5-.9-2.4.7L2.5 15l1.8-1.7v-1.8L2.5 9.8 5 5.5l2.4.7 1.5-.9Z"
+          />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </button>
+    </header>
+    <main>
+      <div id="error" class="page-error" role="alert" hidden></div>
+      <h1 id="title">Current website</h1>
+      <p id="subtitle" class="intro">Loading…</p>
+      <div id="rules" class="popup-rules"></div>
+      <div class="popup-actions">
+        <button id="monitor">Add a limit</button>
+      </div>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
