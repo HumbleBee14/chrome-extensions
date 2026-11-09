@@ -1,38 +1,31 @@
-# Chrome Web Store listing draft
-
-These fields are ready to review, not published. Resolve the open encryption-policy item in [release-readiness.md](release-readiness.md) before submission.
-
-## Name
-
-Intentional
-
-## Short description
-
-Browse with intention: set website limits, choose time and a reason, and reflect on your activity locally.
+# Intentional store listing
 
 ## Description
 
-Pause before opening the websites you tend to lose time on.
+Make every visit a choice.
 
-Set a daily allowance for a whole website, a specific path, or a path and its children. With Intentional visits enabled, choose a reason and a session duration before continuing. Refreshing or opening another matching tab keeps the same timer.
+• Set daily limits for websites or specific paths.
+• Choose why you’re visiting and how long you’ll stay.
+• Get a 30-second wrap-up reminder.
+• Check in when time ends. Allow extra time or prevent overrides.
+• Review daily and weekly activity, reasons, and repeat overrides.
 
-A dismissible warning appears in the final 30 seconds. When your session ends, check in again or leave. After reaching your daily limit, choose extra time and explain why you want to continue. Each extension of time is capped by the daily limit; repeated continuations appear in your Activity log. Enable Prevent overrides to block extra time until midnight.
+Your data stays on your device. No account, ads, analytics, or cloud sync. History is kept for up to 30 days.
 
-Review a day or week of activity, see your reasons and time over limits, or export and clear your records. History is kept locally for up to 30 days, with limits on the number and size of detailed entries.
+A voluntary focus aid—you stay in control.
 
-Daily usage counts the active tab while Chrome is focused. Session timers use elapsed time, including time away from the site. Intentional is a voluntary focus aid, not uninstall protection.
+## Reviewer instructions
 
-No account, analytics, advertising, or cloud sync. Website access is requested when you save a limit. Your records are not sent to the developer. See the privacy policy for storage, retention, and deletion details.
+No login needed.
 
-## Reviewer notes
+1. Add example.com: 2 min daily; Intentional visits on.
+2. Grant access; enter a reason and 1 min.
+3. Refresh: timer persists. Final 30s warns; expiry prompts again.
+4. Use remaining time to reach the daily limit.
 
-The extension-page guard is optional and off by default. It requests the optional tabs permission to recognize Chrome's Extensions manager and show a reminder. The reminder includes a direct Disable guard action that opens the normal Extensions manager. Other removal routes remain available.
+Optional guard: off by default; reminder offers Disable guard.
+Storage: local usage/reasons have no app-level encryption. Please assess this local-only design against User Data FAQ 9.
 
-See [release-readiness.md](release-readiness.md) for the single-purpose statement, permission justifications, data disclosures, and remaining manual checks.
+## Privacy policy
 
-## Account fields still needed
-
-- Public HTTPS privacy-policy URL, using [privacy.md](privacy.md).
-- Developer contact and support URL/email.
-- Clean representative screenshots from the release version; avoid personal browsing records.
-- Developer account verification and final dashboard disclosures.
+https://github.com/HumbleBee14/chrome-extensions/blob/main/intentional/docs/privacy.md
