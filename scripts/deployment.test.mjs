@@ -11,11 +11,7 @@ const base = {
   action: "upload",
   publisherId: "publisher-123",
   extensionId: "a".repeat(32),
-  credentials: {
-    clientId: "client",
-    clientSecret: "secret",
-    refreshToken: "refresh",
-  },
+  accessToken: "access-secret",
   packageBytes: Buffer.from("ZIP"),
   version: "1.2.0",
   sleep: async () => {},
@@ -32,8 +28,6 @@ function api(responses) {
     },
   };
 }
-const token = { access_token: "access-secret" };
-
 test("both packages contain their own root manifest and license, without repository or development files", async () => {
   const dir = await mkdtemp(join(tmpdir(), "chrome-packages-"));
   try {
@@ -79,11 +73,8 @@ test("both packages contain their own root manifest and license, without reposit
   }
 });
 
-test("status only authenticates and reads the selected item", async () => {
-  const mock = api([
-    token,
-    { publishedItemRevisionStatus: { state: "PUBLISHED" } },
-  ]);
+test("status only reads the selected item", async () => {
+  const mock = api([{ publishedItemRevisionStatus: { state: "PUBLISHED" } }]);
   const result = await deploy({
     ...base,
     ...mock,
@@ -91,16 +82,15 @@ test("status only authenticates and reads the selected item", async () => {
     packageBytes: undefined,
   });
   assert.equal(result.publishedItemRevisionStatus.state, "PUBLISHED");
-  assert.equal(mock.calls.length, 2);
+  assert.equal(mock.calls.length, 1);
   assert.ok(
-    mock.calls[1].url.endsWith(`/items/${base.extensionId}:fetchStatus`),
+    mock.calls[0].url.endsWith(`/items/${base.extensionId}:fetchStatus`),
   );
-  assert.equal(mock.calls[1].headers.Authorization, "Bearer access-secret");
+  assert.equal(mock.calls[0].headers.Authorization, "Bearer access-secret");
 });
 
 test("draft upload polls async processing and never submits", async () => {
   const mock = api([
-    token,
     {},
     { uploadState: "IN_PROGRESS" },
     { lastAsyncUploadState: "IN_PROGRESS" },
@@ -120,7 +110,6 @@ test("draft upload polls async processing and never submits", async () => {
 
 test("explicit submit only follows a successful upload and blocks warnings", async () => {
   const mock = api([
-    token,
     {},
     { uploadState: "SUCCEEDED", crxVersion: base.version },
     { state: "PENDING_REVIEW" },
@@ -138,18 +127,17 @@ test("explicit submit only follows a successful upload and blocks warnings", asy
 
 test("failed, unknown, and timed-out uploads cannot submit", async () => {
   for (const state of ["FAILED", "NOT_FOUND", undefined, "IN_PROGRESS"]) {
-    const mock = api([token, {}, { uploadState: state }]);
+    const mock = api([{}, { uploadState: state }]);
     await assert.rejects(
       deploy({ ...base, ...mock, action: "submit", attempts: 0 }),
       /Upload did not complete/,
     );
-    assert.equal(mock.calls.length, 3);
+    assert.equal(mock.calls.length, 2);
   }
 });
 
 test("already published versions are rejected before any upload", async () => {
   const mock = api([
-    token,
     {
       publishedItemRevisionStatus: {
         distributionChannels: [{ crxVersion: base.version }],
@@ -157,14 +145,14 @@ test("already published versions are rejected before any upload", async () => {
     },
   ]);
   await assert.rejects(deploy({ ...base, ...mock }), /already published/);
-  assert.equal(mock.calls.length, 2);
+  assert.equal(mock.calls.length, 1);
 });
 
-test("missing setup and invalid extension IDs fail before authentication", async () => {
+test("missing setup and invalid extension IDs fail before any API request", async () => {
   for (const extra of [
     { publisherId: "" },
     { extensionId: "" },
-    { credentials: {} },
+    { accessToken: "" },
     { action: "bad" },
   ]) {
     const mock = api([]);

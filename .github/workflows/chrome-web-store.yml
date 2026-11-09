@@ -78,6 +78,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -87,6 +90,16 @@ jobs:
         env:
           EXTENSION: ${{ inputs.extension }}
         run: node scripts/package-extension.mjs "$EXTENSION"
+      - name: Authenticate Chrome Extensions Publisher
+        id: google-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.CHROME_GOOGLE_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CHROME_GOOGLE_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false
+          export_environment_variables: false
       - name: Chrome Web Store API
         env:
           EXTENSION: ${{ inputs.extension }}
@@ -94,7 +107,5 @@ jobs:
           CHROME_WEBSTORE_PUBLISHER_ID: ${{ vars.CHROME_WEBSTORE_PUBLISHER_ID }}
           CHROME_EXTENSION_VBLUR_ID: ${{ secrets.CHROME_EXTENSION_VBLUR_ID }}
           CHROME_EXTENSION_INTENTIONAL_ID: ${{ vars.CHROME_EXTENSION_INTENTIONAL_ID }}
-          CI_GOOGLE_CLIENT_ID: ${{ secrets.CI_GOOGLE_CLIENT_ID }}
-          CI_GOOGLE_CLIENT_SECRET: ${{ secrets.CI_GOOGLE_CLIENT_SECRET }}
-          CI_GOOGLE_REFRESH_TOKEN: ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
+          CHROME_WEBSTORE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: node scripts/chrome-web-store.mjs "$EXTENSION" "$STORE_ACTION"

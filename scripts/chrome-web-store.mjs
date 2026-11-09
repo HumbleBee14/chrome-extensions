@@ -11,7 +11,7 @@ export async function deploy({
   action,
   publisherId,
   extensionId,
-  credentials,
+  accessToken,
   packageBytes,
   version,
   fetchImpl = fetch,
@@ -28,10 +28,10 @@ export async function deploy({
     throw new Error(
       "Set the selected extension’s 32-character Chrome Web Store ID.",
     );
-  for (const key of ["clientId", "clientSecret", "refreshToken"]) {
-    if (!credentials?.[key])
-      throw new Error(`Missing OAuth credential: ${key}.`);
-  }
+  if (!accessToken)
+    throw new Error(
+      "Authenticate using the GitHub Actions Google auth step first.",
+    );
   if (action !== "status" && (!packageBytes?.length || !version))
     throw new Error("Build the selected extension ZIP before uploading.");
   const request = async (url, options = {}) => {
@@ -53,23 +53,12 @@ export async function deploy({
         typeof result.error === "string" ? result.error : result.error?.status;
       const safeCode = /^[A-Z_0-9]+$/i.test(code || "") ? ` ${code}` : "";
       throw new Error(
-        `Chrome Web Store request failed (HTTP ${response.status}${safeCode}). Check OAuth access and the Developer Dashboard.`,
+        `Chrome Web Store request failed (HTTP ${response.status}${safeCode}). Check service-account access and the Developer Dashboard.`,
       );
     }
     return result;
   };
-  const token = await request("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      client_id: credentials.clientId,
-      client_secret: credentials.clientSecret,
-      refresh_token: credentials.refreshToken,
-    }),
-  });
-  if (!token.access_token)
-    throw new Error("Google did not return an access token.");
-  const headers = { Authorization: `Bearer ${token.access_token}` };
+  const headers = { Authorization: `Bearer ${accessToken}` };
   const item = `publishers/${publisherId}/items/${extensionId}`;
   const statusUrl = `${API}/v2/${item}:fetchStatus`;
   const before = await request(statusUrl, { headers });
@@ -130,11 +119,7 @@ if (
         slug === "vblur"
           ? process.env.CHROME_EXTENSION_VBLUR_ID
           : process.env.CHROME_EXTENSION_INTENTIONAL_ID,
-      credentials: {
-        clientId: process.env.CI_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.CI_GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.CI_GOOGLE_REFRESH_TOKEN,
-      },
+      accessToken: process.env.CHROME_WEBSTORE_ACCESS_TOKEN,
       version: manifest.version,
       packageBytes:
         action === "status"

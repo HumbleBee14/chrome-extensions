@@ -4,20 +4,25 @@ The **Chrome Web Store** GitHub Actions workflow builds separate ZIPs for VBlur 
 
 ## Connect a developer account
 
-In GitHub → Settings → Secrets and variables → Actions, configure:
+The workflow uses Google Workload Identity Federation to obtain short-lived access tokens for **Chrome Extensions Publisher**. It requires no OAuth refresh token or downloaded service-account key.
 
-| Type     | Name                              | Value                                       |
-| -------- | --------------------------------- | ------------------------------------------- |
-| Secret   | `CI_GOOGLE_CLIENT_ID`             | OAuth client ID                             |
-| Secret   | `CI_GOOGLE_CLIENT_SECRET`         | OAuth client secret                         |
-| Secret   | `CI_GOOGLE_REFRESH_TOKEN`         | Refresh token authorized by the store owner |
-| Secret   | `CHROME_EXTENSION_VBLUR_ID`       | Existing VBlur store item ID                |
-| Variable | `CHROME_WEBSTORE_PUBLISHER_ID`    | Publisher → Settings → Publisher ID         |
-| Variable | `CHROME_EXTENSION_INTENTIONAL_ID` | Intentional store item ID                   |
+Configure these GitHub Actions settings:
 
-Both items can share OAuth credentials when the authorized Google account can manage both. Enable the Chrome Web Store API in the OAuth client’s Google Cloud project. The required scope is `https://www.googleapis.com/auth/chromewebstore`.
+| Type     | Name                              | Value                                             |
+| -------- | --------------------------------- | ------------------------------------------------- |
+| Secret   | `CHROME_EXTENSION_VBLUR_ID`       | Published VBlur store item ID                     |
+| Variable | `CHROME_EXTENSION_INTENTIONAL_ID` | Intentional store item ID                         |
+| Variable | `CHROME_WEBSTORE_PUBLISHER_ID`    | Publisher → Settings → Publisher ID               |
+| Variable | `CHROME_GOOGLE_SERVICE_ACCOUNT`   | Chrome Extensions Publisher service-account email |
+| Variable | `CHROME_GOOGLE_IDENTITY_PROVIDER` | Full workload identity provider resource name     |
 
-If credentials need replacing, follow Google’s [API setup guide](https://developer.chrome.com/docs/webstore/using-api): use your own OAuth client in OAuth Playground, authorize the scope as the store owner, and exchange the code for a refresh token. Store credentials directly as GitHub secrets.
+In Google Cloud, enable the Chrome Web Store API and create a service account without project roles. Link its email in the Chrome Web Store Developer Dashboard’s publisher Settings → Service account.
+
+Create a workload identity pool and GitHub OIDC provider with issuer `https://token.actions.githubusercontent.com`. Map `google.subject=assertion.sub` and `attribute.repository_id=assertion.repository_id`. Restrict the provider condition to this repository’s numeric ID, owner’s numeric ID, `refs/heads/main`, and this workflow’s `workflow_ref`.
+
+Grant `roles/iam.workloadIdentityUser` on the publisher service account to the pool’s repository principal set. The workflow requests only the `https://www.googleapis.com/auth/chromewebstore` scope, and only its manually dispatched store job receives GitHub `id-token: write` permission.
+
+Official setup: [Chrome Web Store service accounts](https://developer.chrome.com/docs/webstore/service-accounts), [Google GitHub authentication action](https://github.com/google-github-actions/auth), and [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines).
 
 ## Create Intentional’s store item once
 
