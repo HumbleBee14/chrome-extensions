@@ -1,0 +1,100 @@
+name: Chrome Web Store
+
+on:
+  push:
+    branches: [main]
+    paths:
+      [
+        "vblur/**",
+        "intentional/**",
+        "scripts/**",
+        ".github/workflows/chrome-web-store.yml",
+      ]
+  pull_request:
+    paths:
+      [
+        "vblur/**",
+        "intentional/**",
+        "scripts/**",
+        ".github/workflows/chrome-web-store.yml",
+      ]
+  workflow_dispatch:
+    inputs:
+      extension:
+        description: Extension
+        type: choice
+        options: [vblur, intentional]
+        required: true
+      action:
+        description: "Build ZIP, check status, upload draft, or upload and submit for review"
+        type: choice
+        options: [build, status, upload, submit]
+        default: build
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrome-web-store-${{ inputs.extension || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        extension: ${{ fromJSON(inputs.extension == 'vblur' && '["vblur"]' || inputs.extension == 'intentional' && '["intentional"]' || '["vblur","intentional"]') }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Test deployment tooling
+        run: node --test scripts/*.test.mjs
+      - name: Install Intentional development dependencies
+        if: matrix.extension == 'intentional'
+        run: npm ci --ignore-scripts
+        working-directory: intentional
+      - name: Check Intentional
+        if: matrix.extension == 'intentional'
+        run: npm run check
+        working-directory: intentional
+      - name: Build extension ZIP
+        env:
+          EXTENSION: ${{ matrix.extension }}
+        run: node scripts/package-extension.mjs "$EXTENSION"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ matrix.extension }}
+          path: dist/${{ matrix.extension }}-*.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  store:
+    if: github.event_name == 'workflow_dispatch' && inputs.action != 'build' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Rebuild selected package
+        env:
+          EXTENSION: ${{ inputs.extension }}
+        run: node scripts/package-extension.mjs "$EXTENSION"
+      - name: Chrome Web Store API
+        env:
+          EXTENSION: ${{ inputs.extension }}
+          STORE_ACTION: ${{ inputs.action }}
+          CHROME_WEBSTORE_PUBLISHER_ID: ${{ vars.CHROME_WEBSTORE_PUBLISHER_ID }}
+          CHROME_EXTENSION_VBLUR_ID: ${{ secrets.CHROME_EXTENSION_VBLUR_ID }}
+          CHROME_EXTENSION_INTENTIONAL_ID: ${{ vars.CHROME_EXTENSION_INTENTIONAL_ID }}
+          CI_GOOGLE_CLIENT_ID: ${{ secrets.CI_GOOGLE_CLIENT_ID }}
+          CI_GOOGLE_CLIENT_SECRET: ${{ secrets.CI_GOOGLE_CLIENT_SECRET }}
+          CI_GOOGLE_REFRESH_TOKEN: ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
+        run: node scripts/chrome-web-store.mjs "$EXTENSION" "$STORE_ACTION"

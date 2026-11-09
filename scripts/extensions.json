@@ -1,0 +1,22 @@
+{
+  "vblur": {
+    "root": "vblur",
+    "files": [
+      "manifest.json",
+      "content.js",
+      "popup.html",
+      "popup.js",
+      "styles",
+      "images/icons/icon16.png",
+      "images/icons/icon32.png",
+      "images/icons/icon48.png",
+      "images/icons/icon128.png"
+    ],
+    "license": "vblur/LICENSE"
+  },
+  "intentional": {
+    "root": "intentional/extension",
+    "files": ["."],
+    "license": "intentional/LICENSE"
+  }
+}
